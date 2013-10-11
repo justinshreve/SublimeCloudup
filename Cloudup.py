@@ -1,4 +1,4 @@
-import sublime, sublime_plugin, tempfile, base64, os, sys, mimetypes, json
+import sublime, sublime_plugin, tempfile, base64, os, sys, mimetypes, json, ntpath
 
 sys.path.append( os.path.join( os.path.dirname( __file__ ), "requests" ) )
 import requests
@@ -22,29 +22,42 @@ class CloudupCommand( sublime_plugin.TextCommand ):
 		tmpfile.close()
 
 		# Get it.. upload? Cloudupload?
-		Cloudupload( tmpfile )
+		Cloudupload( tmpfile.name, 'selection' )
+
+class CloudupfileCommand( sublime_plugin.TextCommand ):
+	def run ( self, edit ):
+		global settings
+		settings = sublime.load_settings( 'Cloudup.sublime-settings' )
+		# the currently opened file
+		currentfile = self.view.file_name()
+		Cloudupload( currentfile, 'file' )
 
 class Cloudupload:
-	def __init__( self, thefile ):
+	def __init__( self, thefile, type ):
 		auth = HTTPBasicAuth( self.auth_username(), self.auth_password() )
 
+		if type == 'file':
+			title = str( ntpath.basename( thefile ) )
+		else:
+			title = 'Untitled Snippet'
+
 		# Create a new stream for this snippet
-		s = requests.post( 'https://api.cloudup.com/1/streams', data = { 'title': 'Untitled Snippet' }, auth = auth )
+		s = requests.post( 'https://api.cloudup.com/1/streams', data = { 'title': title }, auth = auth )
 		if s.status_code != 201:
-			sublime.error_message( 'Snippet creation failed. Please check your username/password and try again' )
+			sublime.error_message( 'Cloudup connection failed. Please check your username/password and try again' )
 			return
 		stream = s.json()
 
 		# Create a new item inside the stream with some starter information
-		file_data = { 'filename': thefile.name, 'mime': 'text/plain', 'stream_id': stream['id'] }
+		file_data = { 'filename': thefile, 'mime': 'text/plain', 'stream_id': stream['id'] }
 		i = requests.post( 'https://api.cloudup.com/1/items', data = file_data, auth = auth )
 		if i.status_code != 201:
-			sublime.error_message( 'Snippet creation failed. Please check your username/password and try again' )
+			sublime.error_message( 'Cloudup connection failed. Please check your username/password and try again' )
 			return
 		item = i.json()
 
 		# I'm just learning python - is there a better way to get the file size here?
-		f = open( thefile.name, 'rb' )
+		f = open( thefile, 'rb' )
 		size = len( f.read() )
 		f.close()
 
@@ -60,12 +73,12 @@ class Cloudupload:
 		}
 
 		files = {
-			'file': open( thefile.name, 'rb' )
+			'file': open( thefile, 'rb' )
 		}
 
 		s3 = requests.post( item['s3_url'], files = files, data = s3_data )
 		if s3.status_code != 204:
-			sublime.error_message( 'Snippet creation failed. Please check your username/password and try again' )
+			sublime.error_message( 'Cloudup connection failed. Please check your username/password and try again' )
 			return
 	
 		# Finally, we need to let Cloudup know that the upload was successful

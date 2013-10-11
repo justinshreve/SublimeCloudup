@@ -1,5 +1,6 @@
 [
 	{
-	"keys": [ "ctrl+alt+x" ], "command": "cloudup"   
+		"keys": [ "ctrl+alt+x" ], "command": "cloudup",
+		"keys": [ "ctrl+alt+f" ], "command": "cloudupfile"  
 	}
 ]

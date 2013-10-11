@@ -4,12 +4,8 @@ sys.path.append( os.path.join( os.path.dirname( __file__ ), "requests" ) )
 import requests
 from requests.auth import HTTPBasicAuth
 
-global settings
-
 class CloudupCommand( sublime_plugin.TextCommand ):
 	def run( self, edit ):
-		global settings
-		settings = sublime.load_settings( 'Cloudup.sublime-settings' )
 		# Grabs the current line or current selection
 		selection = ''
 		for region in self.view.sel():
@@ -26,8 +22,6 @@ class CloudupCommand( sublime_plugin.TextCommand ):
 
 class CloudupfileCommand( sublime_plugin.TextCommand ):
 	def run ( self, edit ):
-		global settings
-		settings = sublime.load_settings( 'Cloudup.sublime-settings' )
 		# the currently opened file
 		currentfile = self.view.file_name()
 		Cloudupload( currentfile, 'file' )
@@ -88,12 +82,14 @@ class Cloudupload:
 		sublime.status_message( item['url'] + ' copied to clipboard' )
 
 	def auth_username( self ):
+		settings = sublime.load_settings( 'Cloudup.sublime-settings' )
 		username = settings.get( 'username' )
 		if not username:
 			sublime.error_message( "Please provide your username in the Cloudup.sublime-settings file." )
 		return username
 
 	def auth_password( self ):
+		settings = sublime.load_settings( 'Cloudup.sublime-settings' )
 		password = settings.get( 'password' )
 		if not password:
 			sublime.error_message( "Please provide your password in the Cloudup.sublime-settings file." )

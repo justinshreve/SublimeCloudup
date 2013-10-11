@@ -56,16 +56,11 @@ class Cloudupload:
 			return
 		item = i.json()
 
-		# I'm just learning python - is there a better way to get the file size here?
-		f = open( thefile, 'rb' )
-		size = len( f.read() )
-		f.close()
-
 		# Now we need to physically upload the file to Amazon using the s3 details we got from item
 		s3_data = {
 			'key': item['s3_key'],
 			'Content-Type': 'text/plain', # @todo: be smarter about this?
-			'Content-Length': size,
+			'Content-Length': os.path.getsize( thefile ),
 			'AWSAccessKeyId': item['s3_access_key'],
 			'acl': 'public-read',
 			'policy': item['s3_policy'],

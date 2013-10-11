@@ -7,7 +7,7 @@ See https://cloudup.com/
 The current version supports sharings snippets/current selection and the currently opened file.
 Support for sharing multiple files/directories is coming soon.
 
-## To install:
+## To install
 
 Put the SublimeCloudup folder in your Sublime 'Packages' folder. 
 
@@ -20,7 +20,7 @@ Create a 'Cloudup.sublime-settings' file in your settings folder and put your Cl
 }
 ```
 
-## Notes:
+## Notes
 
 Currently tested with SublimeText 3 on a Mac. Patches welcome to get this working elsewhere.
 

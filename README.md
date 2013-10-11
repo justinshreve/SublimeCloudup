@@ -26,8 +26,8 @@ Currently tested with SublimeText 3 on a Mac. Patches welcome to get this workin
 
 The current keyboard shortcuts are:
 
-ctrl+alt+x for the current selection
-ctrl+alt+f for the current file 
+* ctrl+alt+x for the current selection
+* ctrl+alt+f for the current file 
 
 You can override these in your user keybinding file.
 

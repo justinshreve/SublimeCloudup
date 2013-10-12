@@ -1,0 +1,22 @@
+[  
+	{
+    	"id": "file",  
+    	"children":  
+    	[
+    		{
+	    		"caption": "Cloudup",
+	    		"children":
+	    		[
+		        	{
+		        		"command": "cloudup",
+		        		"caption": "Current Selection"
+		        	},
+		        	{
+		        		"command": "cloudup_file",
+		        		"caption": "Current File"
+		        	}
+		        ]
+	    	}
+    	] 
+	}  
+]

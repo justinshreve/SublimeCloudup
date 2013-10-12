@@ -20,7 +20,7 @@ class CloudupCommand( sublime_plugin.TextCommand ):
 		# Get it.. upload? Cloudupload?
 		Cloudupload( tmpfile.name, 'selection' )
 
-class CloudupfileCommand( sublime_plugin.TextCommand ):
+class CloudupFileCommand( sublime_plugin.TextCommand ):
 	def run ( self, edit ):
 		# the currently opened file
 		currentfile = self.view.file_name()

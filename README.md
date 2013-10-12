@@ -5,12 +5,11 @@ A Sublime plugin that allows you to share code snippet and files to Cloudup with
 See https://cloudup.com/
 
 You can upload:
-* Snippets of code (currently selection or highlighted line)
-* Single files (currently open file or files from the sidebar)
+
+* Snippets of code (current selection or highlighted line)
+* Single files (currently opened file or files from the sidebar)
 * Multiple files (share an entire directory from the sidebar)
 
-The current version supports sharings snippets/current selection and the currently opened file.
-Support for sharing multiple files/directories is coming soon.
 
 ## To install
 
@@ -36,4 +35,14 @@ The current keyboard shortcuts are:
 
 You can override these in your user keybinding file.
 
-Once the code is uploaded, the stream URL will be copied to your clipboard. You should see a status message at the bottom of the screen about it.
+Menu options for uploading can be found under File > Cloudup
+Right clicking items in the sidebar will show an upload option.
+
+The stream or item URL will be copied to your clipboard automatically. You should see a status message at the bottom of the screen about it.
+
+## Changelog
+
+### 1.0 
+
+Initial Relase. Contains menu, sidebar, and keyboard shortcut support.
+Allows for uploading of snippets, files, and multiple files.

@@ -1,0 +1,10 @@
+[
+	{
+		"command": "cloudup_sidebar",
+		"caption": "Upload to Cloudup",
+		"args":
+		{
+			"paths": []
+		}
+	}
+]

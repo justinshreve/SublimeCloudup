@@ -1,4 +1,4 @@
-import sublime, sublime_plugin, tempfile, base64, os, sys, mimetypes, json, ntpath, time
+import sublime, sublime_plugin, tempfile, base64, os, sys, mimetypes, json, ntpath, threading
 
 sys.path.append( os.path.join( os.path.dirname( __file__ ), "requests" ) )
 import requests
@@ -18,17 +18,22 @@ class CloudupCommand( sublime_plugin.TextCommand ):
 		tmpfile.close()
 
 		# Get it.. upload? Cloudupload?
-		Cloudupload( tmpfile.name, 'selection' )
+		sublime.status_message( 'Starting Cloudup upload...' )
+		thread = Cloudupload( tmpfile.name, 'selection' )
+		thread.start()
 
 class CloudupFileCommand( sublime_plugin.TextCommand ):
 	def run ( self, edit ):
 		# the currently opened file
 		currentfile = self.view.file_name()
-		Cloudupload( currentfile, 'file' )
+		sublime.status_message( 'Starting Cloudup upload...' )
+		thread = Cloudupload( currentfile, 'file' )
+		thread.start()
 
-# @todo This needs to move to a thread
 class CloudupSidebar( sublime_plugin.WindowCommand ):
 	def run(self, paths = [] ):
+		sublime.status_message( 'Starting Cloudup upload...' )
+		threads = []
 		for item in paths:
 			if os.path.isdir( item ):
 				title = str( ntpath.basename( item ) )
@@ -42,37 +47,47 @@ class CloudupSidebar( sublime_plugin.WindowCommand ):
 				for root, subFolders, files in os.walk( item ):
 					for file in files:
 						if file != '.DS_Store':
-							Cloudupload( os.path.join( root, file ), 'file', str( stream['id'] ) )
+							thread = Cloudupload( os.path.join( root, file ), 'file', str( stream['id'] ) )
+							threads.append( thread )
+							thread.start()
 
 				url = 'https://cloudup.com/' + stream['id']
 				sublime.set_clipboard( url )
 				sublime.status_message( 'File(s) uploaded. ' + url + ' copied to clipboard' )
 			else:
-				Cloudupload( item, 'file' )
+				thread = Cloudupload( item, 'file' )
+				thread.start()
 
-class Cloudupload:
-	def __init__( self, thefile, type, stream_id = '' ):
+class Cloudupload(threading.Thread):
+
+	def __init__(self, thefile, type, stream_id = '' ):  
+		self.thefile = thefile
+		self.type = type
+		self.stream_id = stream_id
+		threading.Thread.__init__(self) 
+
+	def run(self):
 		auth = HTTPBasicAuth( Cloudupload.auth_username(), Cloudupload.auth_password() )
 
-		if type == 'file':
-			title = str( ntpath.basename( thefile ) )
+		if self.type == 'file':
+			title = str( ntpath.basename( self.thefile ) )
 		else:
 			title = 'Untitled Snippet'
 
 		# Create a new stream for this snippet if we didn't already pass it one..
-		if stream_id == '':
+		if self.stream_id == '':
 			s = requests.post( 'https://api.cloudup.com/1/streams', data = { 'title': title }, auth = auth )
 			if s.status_code != 201:
 				sublime.error_message( 'Cloudup connection failed. Please check your username/password and try again' )
 				return
 			stream = s.json()
-			stream_id = stream['id']
+			self.stream_id = stream['id']
 			multi = False
 		else:
 			multi = True
 
 		# Create a new item inside the stream with some starter information
-		file_data = { 'filename': thefile, 'stream_id': stream_id }
+		file_data = { 'filename': self.thefile, 'stream_id': self.stream_id }
 		i = requests.post( 'https://api.cloudup.com/1/items', data = file_data, auth = auth )
 		if i.status_code != 201:
 			sublime.error_message( 'Cloudup connection failed. Please check your username/password and try again' )
@@ -82,8 +97,8 @@ class Cloudupload:
 		# Now we need to physically upload the file to Amazon using the s3 details we got from item
 		s3_data = {
 			'key': item['s3_key'],
-			'Content-Type': 'text/plain', # @todo: be smarter about this?
-			'Content-Length': os.path.getsize( thefile ),
+			'Content-Type': 'text/plain',
+			'Content-Length': os.path.getsize( self.thefile ),
 			'AWSAccessKeyId': item['s3_access_key'],
 			'acl': 'public-read',
 			'policy': item['s3_policy'],
@@ -91,7 +106,7 @@ class Cloudupload:
 		}
 
 		files = {
-			'file': open( thefile, 'rb' )
+			'file': open( self.thefile, 'rb' )
 		}
 
 		s3 = requests.post( item['s3_url'], files = files, data = s3_data )
@@ -109,7 +124,10 @@ class Cloudupload:
 
 		if multi == False:
 			sublime.set_clipboard( item['url'] )
-			sublime.status_message( 'Selection uploaded. ' + item['url'] + ' copied to clipboard' )
+			if self.type == 'file':
+				sublime.status_message( 'File uploaded. ' + item['url'] + ' copied to clipboard' )
+			else:
+				sublime.status_message( 'Selection uploaded. ' + item['url'] + ' copied to clipboard' )
 
 	def auth_username():
 		settings = sublime.load_settings( 'Cloudup.sublime-settings' )

@@ -4,6 +4,11 @@ SublimeCloudup
 A Sublime plugin that allows you to share code snippet and files to Cloudup without leaving the editor.
 See https://cloudup.com/
 
+You can upload:
+* Snippets of code (currently selection or highlighted line)
+* Single files (currently open file or files from the sidebar)
+* Multiple files (share an entire directory from the sidebar)
+
 The current version supports sharings snippets/current selection and the currently opened file.
 Support for sharing multiple files/directories is coming soon.
 
@@ -27,7 +32,7 @@ Currently tested with SublimeText 3 on a Mac. Patches welcome to get this workin
 The current keyboard shortcuts are:
 
 * ctrl+alt+x for the current selection
-* ctrl+alt+f for the current file 
+* ctrl+alt+d for the current file 
 
 You can override these in your user keybinding file.
 
